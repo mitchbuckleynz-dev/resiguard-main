@@ -1,27 +1,14 @@
 {
-    "rewrites": [
         {
             "source": "/shared/:path*",
             "destination": "/shared/:path*"
         },
         {
-            "source": "/:path*",
-            "has": [
-                {
-                    "type": "host",
-                    "value": "tanks.resiguard.co.nz"
-                }
-            ],
-            "destination": "/sites/landing-page-tanks/:path*"
+            "source": "/sites/:path*",
+            "destination": "/sites/:path*"
         },
         {
             "source": "/:path*",
-            "has": [
-                {
-                    "type": "host",
-                    "value": "resiguard.co.nz"
-                }
-            ],
             "destination": "/sites/main-platform/:path*"
         }
     ],
