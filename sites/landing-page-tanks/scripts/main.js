@@ -204,7 +204,58 @@ document.addEventListener('DOMContentLoaded', function () {
         animatedElements.forEach(el => el.classList.add('is-visible'));
     }
 
-    // ===== 7. CONSOLE LOG FOR DEBUGGING =====
+    // ===== 7. TESTIMONIAL CAROUSEL =====
+    const slides = document.querySelectorAll('.testimonial-slide');
+    const indicators = document.querySelectorAll('.indicator');
+    let currentSlide = 0;
+    let slideInterval;
+
+    function showSlide(index) {
+        // Remove active class from all slides and indicators
+        slides.forEach(slide => slide.classList.remove('active'));
+        indicators.forEach(indicator => indicator.classList.remove('active'));
+
+        // Add active class to current slide and indicator
+        slides[index].classList.add('active');
+        indicators[index].classList.add('active');
+        currentSlide = index;
+    }
+
+    function nextSlide() {
+        let nextIndex = (currentSlide + 1) % slides.length;
+        showSlide(nextIndex);
+    }
+
+    // Start auto-rotation
+    function startCarousel() {
+        slideInterval = setInterval(nextSlide, 6000); // 6 seconds per slide
+    }
+
+    // Stop auto-rotation
+    function stopCarousel() {
+        clearInterval(slideInterval);
+    }
+
+    // Event listeners for indicators
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+            stopCarousel();
+            showSlide(index);
+            startCarousel(); // Restart timer after manual interaction
+        });
+    });
+
+    // Pause on hover
+    const carouselContainer = document.querySelector('.testimonial-carousel');
+    if (carouselContainer) {
+        carouselContainer.addEventListener('mouseenter', stopCarousel);
+        carouselContainer.addEventListener('mouseleave', startCarousel);
+        
+        // Initial start
+        startCarousel();
+    }
+
+    // ===== 8. CONSOLE LOG FOR DEBUGGING =====
     console.log('🚀 Resiguard Landing Page Loaded');
     console.log('📱 Viewport Size:', window.innerWidth, 'x', window.innerHeight);
     console.log('🔗 UTM Parameters:', getUTMParameters());

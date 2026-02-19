@@ -34,3 +34,21 @@ yarn-error.log*
 
 # Sensitive data (existing site plan - keeping for reference)
 # credentials.json
+
+# Agent Memory Files
+gemini.md
+findings.md
+progress.md
+review.md
+site plan.md
+task_plan.md
+task.md
+walkthrough.md
+sites/landing_page_extract.md
+.agent/
+design/
+temp_skills/
+sites/skills/
+sites/.*
+
+

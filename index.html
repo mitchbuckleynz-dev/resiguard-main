@@ -3,14 +3,64 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=sites/landing-page-tanks/">
-    <title>Redirecting...</title>
-    <script>window.location.href = "sites/landing-page-tanks/";</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resiguard Monorepo</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .link-card {
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: box-shadow 0.2s;
+        }
+
+        .link-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-card strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #4A90A4;
+        }
+    </style>
 </head>
 
 <body>
-    <p>If you are not redirected automatically, follow this <a href="sites/landing-page-tanks/">link to the site</a>.
-    </p>
+    <h1>Resiguard Development Hub</h1>
+    <p>This is the root of your monorepo. Access the individual sites below (Local Development):</p>
+
+    <div class="links">
+        <a href="sites/landing-page-tanks/" class="link-card">
+            <strong>Tanks Landing Page</strong>
+            <span>sites/landing-page-tanks/</span>
+        </a>
+        <a href="sites/main-platform/" class="link-card">
+            <strong>Main Platform (Future)</strong>
+            <span>sites/main-platform/</span>
+        </a>
+    </div>
 </body>
 
 </html>

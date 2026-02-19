@@ -407,26 +407,41 @@
 .testimonials {
     padding: var(--spacing-xl) 0;
     text-align: center;
+    overflow: hidden; /* Ensure no horizontal scroll from slides */
 }
 
-.testimonial-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+/* CAROUSEL STYLES */
+.testimonial-carousel {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto var(--spacing-lg);
+    overflow: hidden;
 }
 
-@media (min-width: 768px) {
-    .testimonial-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+.testimonial-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    width: 100%;
 }
 
-.testimonial {
+.testimonial-slide {
+    min-width: 100%;
+    /* Each slide takes full width */
     background: var(--bg-surface);
     border-radius: var(--border-radius);
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-md);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    /* Hide all by default, show active */
+    display: none;
+    /* Hide completely to prevent layout issues */
+}
+
+.testimonial-slide.active {
+    display: block;
+    opacity: 1;
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .testimonial__photo {
@@ -439,7 +454,8 @@
 }
 
 .testimonial__quote {
-    font-size: 16px;
+    font-size: 18px;
+    /* Slightly larger for single focus */
     color: var(--text-muted);
     font-style: italic;
     margin-bottom: var(--spacing-md);
@@ -449,7 +465,31 @@
 .testimonial__author {
     font-weight: var(--font-weight-semibold);
     color: var(--text-main);
-    font-size: var(--font-size-small);
+    font-size: var(--font-size-body);
+}
+
+/* CAROUSEL INDICATORS */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-border);
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition);
+    padding: 0;
+}
+
+.indicator.active,
+.indicator:hover {
+    background-color: var(--color-primary);
 }
 
 .trust-logos {
