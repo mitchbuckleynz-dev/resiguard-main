@@ -1,101 +1,105 @@
 // api/submit-lead.js
-// Vercel serverless function — keeps Odoo credentials server-side
+// Vercel serverless function — uses Odoo XML-RPC (stateless, no session cookie needed)
 
-const ODOO_URL = 'https://sdnz.odoo.com';
-const ODOO_DB  = 'sdnz';
+const ODOO_URL  = 'https://sdnz.odoo.com';
+const ODOO_DB   = 'sdnz';
 const ODOO_USER = 'mitch@sprinklerdesign.co.nz';
 
-export default async function handler(req, res) {
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+// Simple XML-RPC call helper
+async function xmlrpc(endpoint, method, params) {
+  const body = `<?xml version="1.0"?>
+<methodCall>
+  <methodName>${method}</methodName>
+  <params>${params}</params>
+</methodCall>`;
+
+  const res = await fetch(`${ODOO_URL}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/xml' },
+    body,
+  });
+
+  const text = await res.text();
+
+  // Pull value out of XML response
+  const match = text.match(/<value><int>(\d+)<\/int><\/value>/);
+  if (match) return parseInt(match[1], 10);
+
+  // Check for fault
+  if (text.includes('<fault>')) {
+    const msg = text.match(/<value><string>(.*?)<\/string><\/value>/s);
+    throw new Error(msg ? msg[1] : 'XML-RPC fault');
   }
 
-  // CORS — allow requests from your Vercel domain
+  return null;
+}
+
+module.exports = async function handler(req, res) {
+  // Handle CORS preflight
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { name, email, location, phone } = req.body;
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Basic validation
+  const apiKey = process.env.Odoo;
+  if (!apiKey) {
+    console.error('Odoo env variable not set');
+    return res.status(500).json({ error: 'Server config error' });
+  }
+
+  const { name, email, location, phone } = req.body || {};
+
   if (!name || !email) {
     return res.status(400).json({ error: 'Name and email are required' });
   }
 
-  const apiKey = process.env.Odoo;
-  if (!apiKey) {
-    console.error('Odoo environment variable not set');
-    return res.status(500).json({ error: 'Server configuration error' });
-  }
-
   try {
-    // Step 1: Authenticate with Odoo
-    const authRes = await fetch(`${ODOO_URL}/web/session/authenticate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'call',
-        id: 1,
-        params: {
-          db: ODOO_DB,
-          login: ODOO_USER,
-          password: apiKey,
-        },
-      }),
-    });
+    // Step 1: Authenticate — get uid
+    const uid = await xmlrpc(
+      '/xmlrpc/2/common',
+      'authenticate',
+      `
+      <param><value><string>${ODOO_DB}</string></value></param>
+      <param><value><string>${ODOO_USER}</string></value></param>
+      <param><value><string>${apiKey}</string></value></param>
+      <param><value><struct></struct></value></param>
+      `
+    );
 
-    const authData = await authRes.json();
+    if (!uid) throw new Error('Odoo authentication failed — check API key');
+    console.log(`Odoo auth OK. uid=${uid}`);
 
-    if (!authData.result || !authData.result.uid) {
-      console.error('Odoo auth failed:', authData);
-      throw new Error('Odoo authentication failed');
-    }
+    // Step 2: Create CRM lead
+    const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-    // Extract session cookie for subsequent calls
-    const sessionCookie = authRes.headers.get('set-cookie');
+    const leadXml = `
+      <param><value><string>${ODOO_DB}</string></value></param>
+      <param><value><int>${uid}</int></value></param>
+      <param><value><string>${apiKey}</string></value></param>
+      <param><value><string>crm.lead</string></value></param>
+      <param><value><string>create</string></value></param>
+      <param><value><array><data>
+        <value><struct>
+          <member><name>name</name><value><string>${esc(name)} — Resiguard Enquiry</string></value></member>
+          <member><name>email_from</name><value><string>${esc(email)}</string></value></member>
+          <member><name>phone</name><value><string>${esc(phone)}</string></value></member>
+          <member><name>street</name><value><string>${esc(location)}</string></value></member>
+          <member><name>description</name><value><string>Source: Resiguard landing page&#10;Location: ${esc(location) || 'Not provided'}&#10;Phone: ${esc(phone) || 'Not provided'}</string></value></member>
+        </struct></value>
+      </data></array></value></param>
+      <param><value><struct></struct></value></param>
+    `;
 
-    // Step 2: Create CRM Lead
-    const leadRes = await fetch(`${ODOO_URL}/web/dataset/call_kw`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': sessionCookie,
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'call',
-        id: 2,
-        params: {
-          model: 'crm.lead',
-          method: 'create',
-          args: [{
-            name:        `${name} — Resiguard Enquiry`,
-            email_from:  email,
-            phone:       phone || '',
-            street:      location || '',
-            description: `Lead source: Resiguard landing page\nLocation: ${location || 'Not provided'}\nPhone: ${phone || 'Not provided'}`,
-            tag_ids:     [],           // Add Odoo tag IDs here if you want e.g. [6, 0, [your_tag_id]]
-          }],
-          kwargs: {},
-        },
-      }),
-    });
+    const leadId = await xmlrpc('/xmlrpc/2/object', 'execute_kw', leadXml);
 
-    const leadData = await leadRes.json();
-
-    if (leadData.error) {
-      console.error('Odoo lead creation error:', leadData.error);
-      throw new Error(leadData.error.data?.message || 'Lead creation failed');
-    }
-
-    console.log(`Lead created in Odoo. ID: ${leadData.result}, Name: ${name}, Email: ${email}`);
-    return res.status(200).json({ success: true, leadId: leadData.result });
+    console.log(`Lead created. Odoo ID: ${leadId}, Name: ${name}, Email: ${email}`);
+    return res.status(200).json({ success: true, leadId });
 
   } catch (err) {
     console.error('submit-lead error:', err.message);
-    // Return success to user anyway — don't expose internal errors
+    // Always return success to the user — never show backend errors
     return res.status(200).json({ success: true, fallback: true });
   }
-}
+};
