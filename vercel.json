@@ -1,10 +1,11 @@
 {
   "rewrites": [
-    { "source": "/api/:path*",    "destination": "/api/:path*"              },
-    { "source": "/shared/:path*", "destination": "/shared/:path*"           },
-    { "source": "/sites/:path*",  "destination": "/sites/:path*"            },
-    { "source": "/:path*",        "destination": "/sites/main-platform/:path*" }
+    { "source": "/api/:path*",    "destination": "/api/:path*"                      },
+    { "source": "/shared/:path*", "destination": "/shared/:path*"                   },
+    { "source": "/sites/:path*",  "destination": "/sites/:path*"                    },
+    { "source": "/",              "destination": "/sites/main-platform/index.html"  },
+    { "source": "/:path*",        "destination": "/sites/main-platform/:path*"      }
   ],
   "cleanUrls": true,
-  "trailingSlash": true
+  "trailingSlash": false
 }
