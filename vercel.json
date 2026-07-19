@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/shared/:path*", "destination": "/shared/:path*" },
-    { "source": "/sites/:path*",  "destination": "/sites/:path*"  },
+    { "source": "/api/:path*",    "destination": "/api/:path*"              },
+    { "source": "/shared/:path*", "destination": "/shared/:path*"           },
+    { "source": "/sites/:path*",  "destination": "/sites/:path*"            },
     { "source": "/:path*",        "destination": "/sites/main-platform/:path*" }
   ],
   "cleanUrls": true,

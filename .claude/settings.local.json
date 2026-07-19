@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($py = Get-Command python -ErrorAction SilentlyContinue; $py3 = Get-Command python3 -ErrorAction SilentlyContinue; $node = Get-Command node -ErrorAction SilentlyContinue; $npx = Get-Command npx -ErrorAction SilentlyContinue; \"python: $\\($py.Source\\)\"; \"python3: $\\($py3.Source\\)\"; \"node: $\\($node.Source\\)\"; \"npx: $\\($npx.Source\\)\")",
+      "Bash(ls \"C:\\\\Users\\\\MitchBuckley\\\\OneDrive - Sprinkler Design NZ\\\\AI Builds\\\\Resiguard\\\\\")",
+      "PowerShell(Add-Type -AssemblyName System.Web; powershell.exe -NoProfile -ExecutionPolicy Bypass -File \".\\\\.devserver.ps1\" -Port 5173)",
+      "PowerShell($procs = Get-CimInstance Win32_Process -Filter \"Name='powershell.exe'\"; $matches2 = $procs | Where-Object { $_.CommandLine -and $_.CommandLine -match 'devserver' }; \"Found: $\\(@\\($matches2\\).Count\\)\")"
+    ]
+  }
+}
