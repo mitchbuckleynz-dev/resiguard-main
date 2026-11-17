@@ -5,17 +5,15 @@
 //   1. Odoo CRM lead  (needs env var: Odoo  = Odoo API key for ODOO_USER)
 //   2. Email copy     (needs env var: RESEND_API_KEY; optional NOTIFY_TO, NOTIFY_FROM)
 //
-// Default notification recipient is mitch@sprinklerdesign.co.nz.
+// Default recipient is info@resiguard.co.nz, sent from noreply@resiguard.co.nz
+// (resiguard.co.nz verified in Resend). Both can be overridden by env vars.
 
 const ODOO_URL  = 'https://sdnz.odoo.com';
 const ODOO_DB   = 'sdnz';
 const ODOO_USER = 'mitch@sprinklerdesign.co.nz';
 
-const NOTIFY_TO   = process.env.NOTIFY_TO   || 'mitch@sprinklerdesign.co.nz';
-// Resend lets an account send from onboarding@resend.dev to the account owner's
-// own address with no domain verification. Set NOTIFY_FROM once resiguard.co.nz
-// is verified in Resend, e.g. "Resiguard Website <enquiries@resiguard.co.nz>".
-const NOTIFY_FROM = process.env.NOTIFY_FROM || 'Resiguard Website <onboarding@resend.dev>';
+const NOTIFY_TO   = process.env.NOTIFY_TO   || 'info@resiguard.co.nz';
+const NOTIFY_FROM = process.env.NOTIFY_FROM || 'Resiguard Website <noreply@resiguard.co.nz>';
 
 const esc = (s) => String(s || '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
